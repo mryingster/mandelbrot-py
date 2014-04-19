@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys, math, cairo
 
 # Exit with error message
@@ -38,10 +38,10 @@ def help():
     print "    -h                    Show help screen"
     print "    -o <output.png>       Specify output PNG filename"
     print "                          (default: mandelbrot.png)"
-    print "    --width <int>         Specify image width in pixels"
+    print "    --width <int>         Specify image width in pixels. Maximum is 24889."
     print "                          (default: 512)"
     print "    --coord <x1 y1 x2 y2> Specify rectangular coordinates for view"
-    print "                          (default: -2.25 1.3 .75 -1.3"
+    print "                          (default: -2.25 1.3 .75 -1.3)"
     print "    --color <0x123456>    Specify gradient starting color"
     print "                          (default: 0xff0000)"
     print "    --colors <int>        Specify number of colors in spectrum gradient. The"
@@ -140,9 +140,8 @@ for y in range(0, pixelHeight):
             ctx.set_source_rgb(0,0,0)
         ctx.rectangle(x,y,1,1)
         ctx.fill()
-    print "\r%i%% Complete" % int((y*100)/pixelHeight),
+    print "\r%i%% Complete" % int(((y+1)*100)/pixelHeight),
     sys.stdout.flush()
 
 # Write Output File
 surface.write_to_png(outputName)
-
