@@ -26,11 +26,40 @@ def genColor(startColor):
         colors.append([float(c[0]/255.0), float(c[1]/255.0), float(c[2]/255.0)])
     return colors
 
+def help():
+    #     0         10        20        30        40        50        60        70        80
+    #     |         |         |         |         |         |         |         |         |
+    print "Mandelbrot.py"
+    print
+    print "Usage"
+    print "    Use this script to generate mandelbrot images."
+    print
+    print "Options"
+    print "    -h                    Show help screen"
+    print "    -o <output.png>       Specify output PNG filename"
+    print "                          (default: mandelbrot.png)"
+    print "    --width <int>         Specify image width in pixels"
+    print "                          (default: 512)"
+    print "    --coord <x1 y1 x2 y2> Specify rectangular coordinates for view"
+    print "                          (default: -2.25 1.3 .75 -1.3"
+    print "    --color <0x123456>    Specify gradient starting color"
+    print "                          (default: 0xff0000)"
+    print "    --colors <int>        Specify number of colors in spectrum gradient. The"
+    print "                          gradient cycles through the spectrum in 1530 steps"
+    print "                          (default: 1024)"
+    print "    --depth <int>         Specify how many levels to calculate each point"
+    print "                          (default: 125)"
+    print
+    quit()
+
 # Setup Defualt Values
 xL, yU = -2.25, 1.3 # -.29, .98 ##Top Left Coordinate
 xU, yL = .75, -1.3 # 0.06, .6 ##Bottom Right Coordinate
 pixelWidth = 512
 startColor = 0xff0000
+colorRange = 1024
+outputName = "mandelbrot.png"
+calcDepth = 125
 
 # Parse Arguments
 skip=0
@@ -39,39 +68,38 @@ for i in range(1, len(sys.argv)):
         skip-=1
         continue
     if sys.argv[i] == "--coord":
-        if len(sys.argv) <= i+4:
-            die("Not enough arguments supplied.")
+        if len(sys.argv) <= i+4: die("Not enough arguments supplied.")
         try:
             xL = float(sys.argv[i+1])
             yU = float(sys.argv[i+2])
             xU = float(sys.argv[i+3])
             yL = float(sys.argv[i+4])
-        except:
-            die("Invalid coordinates")
-        if xL >= xU:
-            die("Invalid x coordinates")
-        if yL >= yU:
-            die("Invalid Y coordinates")
+        except:      die("Invalid coordinates")
+        if xL >= xU: die("Invalid x coordinates")
+        if yL >= yU: die("Invalid Y coordinates")
         skip=4
     elif sys.argv[i] == "--width":
-        try:
-            pixelWidth = int(sys.argv[i+1])
-        except:
-            die("Invalid width value.")
-        if pixelWidth <1:
-            die("Invalid image width (px)")
+        try:    pixelWidth = int(sys.argv[i+1])
+        except: die("Invalid width value.")
+        if pixelWidth <1: die("Invalid image width (px)")
         skip=1
     elif sys.argv[i] == "--color":
-        try:
-            startColor=int(sys.argv[i+1],16)
-        except:
-            die("Invalid color.")
+        try:    startColor=int(sys.argv[i+1],16)
+        except: die("Invalid color.")
         skip=1
     elif sys.argv[i] == "-o":
-        outputName=sys.argv[i+1]
+        outputName = sys.argv[i+1]
+        skip=1
+    elif sys.argv[i] == "--depth":
+        try:    calcDepth = int(sys.argv[i+1])
+        except: die("Invalid integer for depth value")
+        skip=1
+    elif sys.argv[i] == "--colors":
+        try:    colorRange = int(sys.argv[i+1])
+        except: die("Invalid integer for color range value")
         skip=1
     elif sys.argv[i] == "-h":
-        print "SHOW HELP"
+        help()
     else:
         die ("Unknown option, \"%s\". Please try -h for help." % sys.argv[i])
 
@@ -80,10 +108,9 @@ xRange = xU - xL
 yRange = yU - yL
 pixelHeight = int(pixelWidth/xRange*yRange)
 step = xRange / ( pixelWidth - 1.0 )
-depth = 125
 
 # Setup Color
-colorIncrement = 1024/depth
+colorIncrement = colorRange/calcDepth
 colorTable = genColor(startColor)
 
 # Setup Cairo
@@ -102,7 +129,7 @@ for y in range(0, pixelHeight):
         xValue, yValue = (xL+(x*step)), (yU-(y*step))
         xP, yP = 0, 0
         isMandelbrot = 0
-        for i in range(depth):
+        for i in range(calcDepth):
             xP, yP = mandel(xP, yP, xValue, yValue)
             if abs(xP) > 10 or abs(yP) > 10:
                 red, green, blue = colorTable[i*colorIncrement]
@@ -118,3 +145,4 @@ for y in range(0, pixelHeight):
 
 # Write Output File
 surface.write_to_png(outputName)
+
