@@ -59,7 +59,7 @@ pixelWidth = 512
 startColor = 0xff0000
 colorRange = 1024
 outputName = "mandelbrot.png"
-calcDepth = 125
+maxDepth = 125
 
 # Parse Arguments
 skip=0
@@ -91,7 +91,7 @@ for i in range(1, len(sys.argv)):
         outputName = sys.argv[i+1]
         skip=1
     elif sys.argv[i] == "--depth":
-        try:    calcDepth = int(sys.argv[i+1])
+        try:    maxDepth = int(sys.argv[i+1])
         except: die("Invalid integer for depth value")
         skip=1
     elif sys.argv[i] == "--colors":
@@ -110,7 +110,7 @@ pixelHeight = int(pixelWidth/xRange*yRange)
 step = xRange / ( pixelWidth - 1.0 )
 
 # Setup Color
-colorIncrement = colorRange/calcDepth
+colorIncrement = colorRange/maxDepth
 colorTable = genColor(startColor)
 
 # Setup Cairo
@@ -118,26 +118,27 @@ surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, pixelWidth, pixelHeight)
 ctx = cairo.Context (surface)
 
 # Mandelbrot Calculation
-def mandel(xP, yP, x, y):
-    xOut = (xP ** 2) + x - (yP ** 2)
-    yOut = 2 * xP * yP + y
-    return xOut, yOut
+def mandel(x, y, maxDepth):
+    limit = 10
+    xP, yP = 0, 0
+    for i in range(maxDepth):
+        xT = (xP ** 2) + x - (yP ** 2)
+        yT = 2 * xP * yP + y
+        if abs(xT) > limit or abs(yT) > limit:
+            return i
+        xP, yP = xT, yT
+    return -1
 
 # Process Mandelbrot Image
 for y in range(0, pixelHeight):
     for x in range(0, pixelWidth):
         xValue, yValue = (xL+(x*step)), (yU-(y*step))
-        xP, yP = 0, 0
-        isMandelbrot = 0
-        for i in range(calcDepth):
-            xP, yP = mandel(xP, yP, xValue, yValue)
-            if abs(xP) > 10 or abs(yP) > 10:
-                red, green, blue = colorTable[i*colorIncrement]
-                ctx.set_source_rgb(red, green, blue)
-                isMandelbrot=1
-                break
-        if isMandelbrot == 0:
+        depth=mandel(xValue, yValue, maxDepth)
+        if depth == -1:
             ctx.set_source_rgb(0,0,0)
+        else:
+            red, green, blue = colorTable[depth*colorIncrement]
+            ctx.set_source_rgb(red, green, blue)
         ctx.rectangle(x,y,1,1)
         ctx.fill()
     print "\r%i%% Complete" % int(((y+1)*100)/pixelHeight),
