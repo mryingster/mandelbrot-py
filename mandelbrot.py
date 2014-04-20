@@ -26,82 +26,32 @@ def genColor(startColor):
         colors.append([float(c[0]/255.0), float(c[1]/255.0), float(c[2]/255.0)])
     return colors
 
-def help():
-    #     0         10        20        30        40        50        60        70        80
-    #     |         |         |         |         |         |         |         |         |
-    print "Mandelbrot.py"
-    print
-    print "Usage"
-    print "    Use this script to generate mandelbrot images."
-    print
-    print "Options"
-    print "    -h                    Show help screen"
-    print "    -o <output.png>       Specify output PNG filename"
-    print "                          (default: mandelbrot.png)"
-    print "    --width <int>         Specify image width in pixels. Maximum is 24889."
-    print "                          (default: 512)"
-    print "    --coord <x1 y1 x2 y2> Specify rectangular coordinates for view"
-    print "                          (default: -2.25 1.3 .75 -1.3)"
-    print "    --color <0x123456>    Specify gradient starting color"
-    print "                          (default: 0xff0000)"
-    print "    --colors <int>        Specify number of colors in spectrum gradient. The"
-    print "                          gradient cycles through the spectrum in 1530 steps"
-    print "                          (default: 1024)"
-    print "    --depth <int>         Specify how many levels to calculate each point"
-    print "                          (default: 125)"
-    print
-    quit()
-
-# Setup Defualt Values
-xL, yU = -2.25, 1.3 # -.29, .98 ##Top Left Coordinate
-xU, yL = .75, -1.3 # 0.06, .6 ##Bottom Right Coordinate
-pixelWidth = 512
-startColor = 0xff0000
-colorRange = 1024
-outputName = "mandelbrot.png"
-maxDepth = 125
-
 # Parse Arguments
-skip=0
-for i in range(1, len(sys.argv)):
-    if skip > 0:
-        skip-=1
-        continue
-    if sys.argv[i] == "--coord":
-        if len(sys.argv) <= i+4: die("Not enough arguments supplied.")
-        try:
-            xL = float(sys.argv[i+1])
-            yU = float(sys.argv[i+2])
-            xU = float(sys.argv[i+3])
-            yL = float(sys.argv[i+4])
-        except:      die("Invalid coordinates")
-        if xL >= xU: die("Invalid x coordinates")
-        if yL >= yU: die("Invalid Y coordinates")
-        skip=4
-    elif sys.argv[i] == "--width":
-        try:    pixelWidth = int(sys.argv[i+1])
-        except: die("Invalid width value.")
-        if pixelWidth <1: die("Invalid image width (px)")
-        skip=1
-    elif sys.argv[i] == "--color":
-        try:    startColor=int(sys.argv[i+1],16)
-        except: die("Invalid color.")
-        skip=1
-    elif sys.argv[i] == "-o":
-        outputName = sys.argv[i+1]
-        skip=1
-    elif sys.argv[i] == "--depth":
-        try:    maxDepth = int(sys.argv[i+1])
-        except: die("Invalid integer for depth value")
-        skip=1
-    elif sys.argv[i] == "--colors":
-        try:    colorRange = int(sys.argv[i+1])
-        except: die("Invalid integer for color range value")
-        skip=1
-    elif sys.argv[i] == "-h":
-        help()
-    else:
-        die ("Unknown option, \"%s\". Please try -h for help." % sys.argv[i])
+def hex(string):
+    return int(string,16)
+
+import argparse
+parser = argparse.ArgumentParser(description='Use this script to generate mandelbrot images.')
+parser.add_argument('--output', '-o',                      default = "mandelbrot.png"       , help='Specify output PNG filename. (default: %(default)s)')
+parser.add_argument('--width',        type=int,            default = 512                    , help='Specify image width in pixels. Maximum is 24889. (default: %(default)s)')
+parser.add_argument('--coord',        type=float, nargs=4, default = [-2.25, 1.3, .75, -1.3], help='Specify rectangular coordinates for view (default: %(default)s)', metavar=('x1', 'y1', 'x2', 'y2'))
+parser.add_argument('--color',        type=hex,            default = 0xff0000               , help='Specify gradient starting color. (default: 0x%(default)x)')
+parser.add_argument('--colors',       type=int,            default = 1024                   , help='Specify number of colors in spectrum gradient. The ' +
+                                                                                                   'gradient cycles through the spectrum in 1530 steps (default: %(default)s)')
+parser.add_argument('--depth',        type=int,            default = 125                    , help='Specify how many levels to calculate each point. (default: %(default)s)')
+
+options = parser.parse_args()
+
+(xL, yU, xU, yL) = options.coord
+pixelWidth = options.width
+startColor = options.color
+colorRange = options.colors
+outputName = options.output
+maxDepth = options.depth
+if xL >= xU: die("Invalid x coordinates")
+if yL >= yU: die("Invalid Y coordinates")
+if pixelWidth <1: die("Invalid image width (px)")
+
 
 # Setup Sizes
 xRange = xU - xL
