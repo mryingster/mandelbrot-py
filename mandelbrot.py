@@ -8,15 +8,18 @@ def die(message):
 
 # Generate Table for spectrum of colors
 def genSpectrum(c, depth):
+    numColors = 256 * 6
+    increment = math.floor(numColors/depth)
     colors=[]
-    for i in range(1536):
+    for i in range(numColors):
         if   c[0] == 255 and c[1] <  255 and c[2] == 0:                 c[1]+=1  #Red to yellow
         elif c[0] <= 255 and c[1] == 255 and c[2] == 0   and c[0] != 0: c[0]-=1  #yellow to green
         elif c[0] == 0   and c[1] == 255 and c[2] <  255:               c[2]+=1  #green to cyan
         elif c[0] == 0   and c[1] <= 255 and c[2] == 255 and c[1] != 0: c[1]-=1  #cyan to blue
         elif c[0] <  255 and c[1] == 0   and c[2] == 255:               c[0]+=1  #blue to purple
         elif c[0] == 255 and c[1] == 0   and c[2] <= 255 and c[2] != 0: c[2]-=1  #purple to red
-        colors.append([float(c[0]/255.0), float(c[1]/255.0), float(c[2]/255.0)])
+        if i % increment == 0:
+            colors.append([float(c[0]/255.0), float(c[1]/255.0), float(c[2]/255.0)])
     return colors
 
 # Generate gradient based on user input
