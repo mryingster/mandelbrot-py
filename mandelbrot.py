@@ -34,19 +34,6 @@ def genNonlinearGradient(c1, c2, depth):
         b = c1[2]+(bRange*multiplier)
     return colors
 
-def genLinearGradient(c1, c2, depth):
-    colors = []
-    r, g, b = c1
-    rInc = float((c2[0] - c1[0]) / depth)
-    gInc = float((c2[1] - c1[1]) / depth)
-    bInc = float((c2[2] - c1[2]) / depth)
-    for i in range(depth+1):
-        colors.append([r/255.0, g/255.0, b/255.0])
-        r += rInc
-        g += gInc
-        b += bInc
-    return colors
-
 # Parse Arguments
 import argparse
 parser = argparse.ArgumentParser(description='Use this script to generate mandelbrot images.')
