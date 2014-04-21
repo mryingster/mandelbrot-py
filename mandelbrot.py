@@ -49,10 +49,11 @@ def genRandom(depth):
 import argparse
 parser = argparse.ArgumentParser(description='Use this script to generate mandelbrot images.')
 parser.add_argument('--output', '-o',                      default = "mandelbrot.png",         help='Specify output PNG filename. (default: %(default)s)')
-parser.add_argument('--width',        type=int,            default = 512,                      help='Specify image width in pixels. Maximum is 24889. (default: %(default)s)')
-parser.add_argument('--coord',        type=float, nargs=4, default = [-2.25, 1.3, .75, -1.3],  help='Specify rectangular coordinates for view (default: %(default)s)', metavar=('x1', 'y1', 'x2', 'y2'))
-parser.add_argument('--color',        type=int, nargs=6,   default = [255, 0, 0, 255, 255, 0], help='Specify gradient starting and ending values (0-255 for r, g, and b). (default: %(default)s)',        metavar=('R', 'G', 'B', 'R', 'G', 'B'))
-parser.add_argument('--depth',        type=int,            default = 125,                      help='Specify how many levels to calculate each point. (default: %(default)s)')
+parser.add_argument('--width',        type=int,            default = 512,                      help='Specify image width in pixels. Maximum is 24889. (default: %(default)s)',                     metavar=('n'))
+parser.add_argument('--coord',        type=float, nargs=4, default = [-2.25, 1.3, .75, -1.3],  help='Specify rectangular coordinates for view (default: %(default)s)',                             metavar=('x1', 'y1', 'x2', 'y2'))
+parser.add_argument('--color',        type=int, nargs=6,   default = [255, 0, 0, 255, 255, 0], help='Specify gradient starting and ending values (0-255 for r, g, and b). (default: %(default)s)', metavar=('R', 'G', 'B', 'R', 'G', 'B'))
+parser.add_argument('--colorm',       type=int, nargs=3,   default = [0, 0, 0],                help='Specify color for points that fall in the mandelbrot series. (default: %(default)s)',         metavar=('R', 'G', 'B'))
+parser.add_argument('--depth',        type=int,            default = 125,                      help='Specify how many levels to calculate each point. (default: %(default)s)',                     metavar=('n'))
 parser.add_argument('--random',                            action="store_true",                help='Use random colors when generating image')
 parser.add_argument('--spectrum',                          action="store_true",                help='Use color spectrum when generating image')
 options = parser.parse_args()
@@ -100,7 +101,7 @@ for y in range(0, pixelHeight):
         xValue, yValue = (xL+(x*step)), (yU-(y*step))
         depth=mandel(xValue, yValue, options.depth)
         if depth == -1:
-            red, green, blue = 0,0,0
+            red, green, blue = options.colorm
         else:
             red, green, blue = colorTable[depth]
         ctx.set_source_rgb(red, green, blue)
