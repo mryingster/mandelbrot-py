@@ -63,6 +63,7 @@ for i in range(6):
     if options.color[i] < 0 or options.color[i] > 255:
         die("Invalid color value,")
 colorTable = genNonlinearGradient(options.color[0:3], options.color[3:6], options.depth)
+#colorTable = genSpectrum(options.color[0:3], options.depth)
 
 # Setup Cairo
 surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, options.width, pixelHeight)
@@ -70,12 +71,12 @@ ctx = cairo.Context (surface)
 
 # Mandelbrot Calculation
 def mandel(x, y, depth):
-    limit = 10
+    limit = 2
     xP, yP = 0, 0
     for i in range(depth):
         xT = (xP ** 2) + x - (yP ** 2)
         yT = 2 * xP * yP + y
-        if abs(xT) > limit or abs(yT) > limit:
+        if math.sqrt(abs(xT)**2 + abs(yT)**2) > limit:
             return i
         xP, yP = xT, yT
     return -1
