@@ -6,7 +6,7 @@ def die(message):
     print "ERROR:", message
     quit()
 
-# Generate Table for spectrum of colors
+# Generate color table for spectrum of colors
 def genSpectrum(c, depth):
     numColors = 256 * 6
     increment = math.floor(numColors/depth)
@@ -22,7 +22,7 @@ def genSpectrum(c, depth):
             colors.append([float(c[0]/255.0), float(c[1]/255.0), float(c[2]/255.0)])
     return colors
 
-# Generate gradient based on user input
+# Generate color table for gradient based on user input
 def genNonlinearGradient(c1, c2, depth):
     colors = []
     r, g, b = c1
@@ -37,15 +37,24 @@ def genNonlinearGradient(c1, c2, depth):
         b = c1[2]+(bRange*multiplier)
     return colors
 
+# Generate color table for random colors
+def genRandom(depth):
+    import random
+    colors=[]
+    for i in range(depth):
+        colors.append([random.random(), random.random(), random.random()])
+    return colors
+
 # Parse Arguments
 import argparse
 parser = argparse.ArgumentParser(description='Use this script to generate mandelbrot images.')
-parser.add_argument('--output', '-o',                      default = "mandelbrot.png"        , help='Specify output PNG filename. (default: %(default)s)')
-parser.add_argument('--width',        type=int,            default = 512                     , help='Specify image width in pixels. Maximum is 24889. (default: %(default)s)')
-parser.add_argument('--coord',        type=float, nargs=4, default = [-2.25, 1.3, .75, -1.3] , help='Specify rectangular coordinates for view (default: %(default)s)', metavar=('x1', 'y1', 'x2', 'y2'))
-parser.add_argument('--color',        type=int, nargs=6,   default = [255, 0, 0, 255, 255, 0], help='Specify gradient starting and ending values (0-255 for r, g, and b). (default: %(default)s)',         metavar=('R', 'G', 'B', 'R', 'G', 'B'))
-parser.add_argument('--depth',        type=int,            default = 125                     , help='Specify how many levels to calculate each point. (default: %(default)s)')
-
+parser.add_argument('--output', '-o',                      default = "mandelbrot.png",         help='Specify output PNG filename. (default: %(default)s)')
+parser.add_argument('--width',        type=int,            default = 512,                      help='Specify image width in pixels. Maximum is 24889. (default: %(default)s)')
+parser.add_argument('--coord',        type=float, nargs=4, default = [-2.25, 1.3, .75, -1.3],  help='Specify rectangular coordinates for view (default: %(default)s)', metavar=('x1', 'y1', 'x2', 'y2'))
+parser.add_argument('--color',        type=int, nargs=6,   default = [255, 0, 0, 255, 255, 0], help='Specify gradient starting and ending values (0-255 for r, g, and b). (default: %(default)s)',        metavar=('R', 'G', 'B', 'R', 'G', 'B'))
+parser.add_argument('--depth',        type=int,            default = 125,                      help='Specify how many levels to calculate each point. (default: %(default)s)')
+parser.add_argument('--random',                            action="store_true",                help='Use random colors when generating image')
+parser.add_argument('--spectrum',                          action="store_true",                help='Use color spectrum when generating image')
 options = parser.parse_args()
 
 # Setup Sizes
@@ -62,8 +71,12 @@ step = xRange / ( options.width - 1.0 )
 for i in range(6):
     if options.color[i] < 0 or options.color[i] > 255:
         die("Invalid color value,")
-colorTable = genNonlinearGradient(options.color[0:3], options.color[3:6], options.depth)
-#colorTable = genSpectrum(options.color[0:3], options.depth)
+if options.random:
+    colorTable = genRandom(options.depth)
+elif options.spectrum:
+    colorTable = genSpectrum([255, 0, 0], options.depth)
+else:
+    colorTable = genNonlinearGradient(options.color[0:3], options.color[3:6], options.depth)
 
 # Setup Cairo
 surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, options.width, pixelHeight)
