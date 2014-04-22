@@ -31,7 +31,7 @@ def genNonlinearGradient(c1, c2, depth):
     bRange = float((c2[2] - c1[2]))
     for i in range(depth):
         colors.append([r/255.0, g/255.0, b/255.0])
-        multiplier = float(math.sqrt((i+1.0)/depth))
+        multiplier = float(((i+1.0)/depth)**.33)
         r = c1[0]+(rRange*multiplier)
         g = c1[1]+(gRange*multiplier)
         b = c1[2]+(bRange*multiplier)
@@ -48,9 +48,9 @@ def genRandom(depth):
 # Parse Arguments
 import argparse
 parser = argparse.ArgumentParser(description='Use this script to generate mandelbrot images.')
-parser.add_argument('--output', '-o',                      default = "mandelbrot.png",         help='Specify output PNG filename. (default: %(default)s)')
+parser.add_argument('--output', '-o',                      default = "mandelbrot.png",         help='Specify output PNG filename. (default: %(default)s)',                                         metavar=('filename.png'))
 parser.add_argument('--width',        type=int,            default = 512,                      help='Specify image width in pixels. Maximum is 24889. (default: %(default)s)',                     metavar=('n'))
-parser.add_argument('--coord',        type=float, nargs=4, default = [-2.25, 1.3, .75, -1.3],  help='Specify rectangular coordinates for view (default: %(default)s)',                             metavar=('x1', 'y1', 'x2', 'y2'))
+parser.add_argument('--coord',        type=float, nargs=4, default = [-2, 2, 2, -2],           help='Specify rectangular coordinates for view (default: %(default)s)',                             metavar=('x1', 'y1', 'x2', 'y2'))
 parser.add_argument('--color',        type=int, nargs=6,   default = [255, 0, 0, 255, 255, 0], help='Specify gradient starting and ending values (0-255 for r, g, and b). (default: %(default)s)', metavar=('R', 'G', 'B', 'R', 'G', 'B'))
 parser.add_argument('--colorm',       type=int, nargs=3,   default = [0, 0, 0],                help='Specify color for points that fall in the mandelbrot series. (default: %(default)s)',         metavar=('R', 'G', 'B'))
 parser.add_argument('--depth',        type=int,            default = 125,                      help='Specify how many levels to calculate each point. (default: %(default)s)',                     metavar=('n'))
@@ -85,12 +85,11 @@ ctx = cairo.Context (surface)
 
 # Mandelbrot Calculation
 def mandel(x, y, depth):
-    limit = 2
     xP, yP = 0, 0
     for i in range(depth):
         xT = (xP ** 2) + x - (yP ** 2)
         yT = 2 * xP * yP + y
-        if math.sqrt(abs(xT)**2 + abs(yT)**2) > limit:
+        if (abs(xT)**2 + abs(yT)**2) > 4:
             return i
         xP, yP = xT, yT
     return -1
